@@ -65,7 +65,7 @@ export default async function HomePage({ params }: Args) {
             </p>
           )}
           <h1 className="mt-4 text-[clamp(1.9rem,6vw,3.15rem)] font-bold leading-[1.1] text-white">
-            {home?.heroHeading ?? 'CAC'}
+            {home?.heroHeading ?? 'MBI'}
           </h1>
           {home?.heroParagraph && (
             <p className="mt-5 max-w-[30rem] text-[0.9375rem] leading-relaxed text-white/80 sm:text-base">
@@ -185,7 +185,7 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const locale = (isLocale(raw) ? raw : 'fr') as Locale
   const [home, settings] = await Promise.all([getHomepage(locale), getSiteSettings(locale)])
   return {
-    title: settings?.defaultMetaTitle ?? settings?.siteName ?? 'CAC — Contemporary Artistic Construction',
+    title: settings?.defaultMetaTitle ?? settings?.siteName ?? 'MBI — Modern Building Industry',
     description: settings?.defaultMetaDescription ?? home?.heroParagraph ?? undefined,
   }
 }

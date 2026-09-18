@@ -95,7 +95,7 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
 
       <div className="border-t border-white/10">
         <div className="mbi-shell py-4 text-xs text-white/40">
-          © {new Date().getFullYear()} CAC — Contemporary Artistic Construction
+          © {new Date().getFullYear()} MBI — Modern Building Industry
         </div>
       </div>
     </footer>

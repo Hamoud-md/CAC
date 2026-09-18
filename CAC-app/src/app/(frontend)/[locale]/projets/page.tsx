@@ -69,4 +69,4 @@ export default async function ProjectsPage({ params }: Args) {
   )
 }
 
-export const metadata: Metadata = { title: 'Projets | CAC' }
+export const metadata: Metadata = { title: 'Projets | MBI' }

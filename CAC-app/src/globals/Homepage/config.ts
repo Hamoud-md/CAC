@@ -21,8 +21,8 @@ export const Homepage: GlobalConfig = {
           type: 'text',
           localized: true,
           label: 'Sur-titre',
-          defaultValue: 'Contemporary Artistic Construction',
-          admin: { placeholder: 'Ex : Contemporary Artistic Construction' },
+          defaultValue: 'Modern Building Industry',
+          admin: { placeholder: 'Ex : Modern Building Industry' },
         },
         {
           name: 'heroHeading',
@@ -37,7 +37,7 @@ export const Homepage: GlobalConfig = {
           type: 'textarea',
           localized: true,
           label: 'Paragraphe',
-          admin: { placeholder: 'Une ou deux phrases qui présentent CAC.' },
+          admin: { placeholder: 'Une ou deux phrases qui présentent MBI.' },
         },
         {
           type: 'row',
@@ -101,7 +101,7 @@ export const Homepage: GlobalConfig = {
               label: 'Couleur du voile',
               defaultValue: 'purple',
               options: [
-                { label: 'Violet', value: 'purple' },
+                { label: 'Violet MBI', value: 'purple' },
                 { label: 'Bleu nuit', value: 'navy' },
                 { label: 'Noir', value: 'black' },
               ],

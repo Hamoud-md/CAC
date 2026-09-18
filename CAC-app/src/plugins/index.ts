@@ -19,7 +19,7 @@ export const plugins: Plugin[] = [
   }),
   seoPlugin({
     generateTitle: ({ doc }: { doc?: { title?: string } }) =>
-      doc?.title ? `${doc.title} | CAC` : 'CAC — Contemporary Artistic Construction',
+      doc?.title ? `${doc.title} | MBI` : 'MBI — Modern Building Industry',
     generateURL: ({ doc }: { doc?: { slug?: string } }) => {
       const url = getServerSideURL()
       return doc?.slug ? `${url}/${doc.slug}` : url

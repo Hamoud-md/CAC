@@ -34,7 +34,7 @@ type L = { fr: string; ar: string; en: string }
 type Sub = { slug: string; title: L }
 type Cat = { slug: string; title: L; sumFr: string; img?: string; subs: Sub[] }
 
-// 11 initial categories. AR/EN are best-effort; editable in the dashboard.
+// 11 categories from MBI's brief. AR/EN are best-effort; editable in the dashboard.
 const categories: Cat[] = [
   {
     slug: 'prefabrique',
@@ -183,13 +183,13 @@ async function run() {
   payload.logger.info('Cleared content collections')
 
   // 1. Admin user
-  const existing = await payload.find({ collection: 'users', limit: 1, where: { email: { equals: 'admin@cac.local' } } })
+  const existing = await payload.find({ collection: 'users', limit: 1, where: { email: { equals: 'admin@mbirim.com' } } })
   if (existing.totalDocs === 0) {
     await payload.create({
       collection: 'users',
-      data: { name: 'CAC Admin', email: 'admin@cac.local', password: 'cac-admin-2026', role: 'admin' },
+      data: { name: 'MBI Admin', email: 'admin@mbirim.com', password: 'mbi-admin-2026', role: 'admin' },
     })
-    payload.logger.info('Created admin user admin@cac.local / cac-admin-2026')
+    payload.logger.info('Created admin user admin@mbirim.com / mbi-admin-2026')
   }
 
   // 2. SiteSettings — seed fr first (creates array rows + ids), then reuse the
@@ -212,10 +212,16 @@ async function run() {
     context: { disableRevalidate: true },
     data: {
       ...(logo ? { logo } : {}),
-      siteName: 'CAC — Contemporary Artistic Construction',
+      phone: '+222 33 86 85 55',
+      email: 'info@mbirim.com',
+      address: 'TVZ, Nouakchott, Mauritanie',
+      siteName: 'MBI — Modern Building Industry',
+      tagline:
+        'Solutions durables en construction, équipements et services — Nouakchott, Mauritanie.',
       secondaryNav: navHrefs.map((href, i) => ({ href, label: navLabels.fr[i] })),
-      defaultMetaTitle: 'CAC — Contemporary Artistic Construction',
-      defaultMetaDescription: 'Contemporary Artistic Construction.',
+      defaultMetaTitle: 'MBI — Modern Building Industry',
+      defaultMetaDescription:
+        'MBI conçoit et réalise des solutions durables dans la construction, les équipements et les services en Mauritanie.',
     },
   })
   const rowIds = (savedFr.secondaryNav ?? []).map((r) => r.id)
@@ -227,7 +233,15 @@ async function run() {
       context: { disableRevalidate: true },
       data: {
         ...(logo ? { logo } : {}),
-        siteName: loc === 'ar' ? 'CAC' : 'CAC — Contemporary Artistic Construction',
+        siteName: loc === 'ar' ? 'MBI' : 'MBI — Modern Building Industry',
+        address:
+          loc === 'ar'
+            ? 'المنطقة الحرة تجكجة، نواكشوط، موريتانيا'
+            : 'TVZ, Nouakchott, Mauritania',
+        tagline:
+          loc === 'ar'
+            ? 'حلول مستدامة في البناء والتجهيزات والخدمات — نواكشوط، موريتانيا.'
+            : 'Durable solutions in construction, equipment and services — Nouakchott, Mauritania.',
         secondaryNav: navHrefs.map((href, i) => ({ id: rowIds[i], href, label: navLabels[loc][i] })),
       },
     })
@@ -235,16 +249,16 @@ async function run() {
   payload.logger.info('Updated SiteSettings')
 
   // 3. Homepage
-  const heroImageId = await uploadImg(pub('landingpage.jpeg'), 'Projet architectural CAC')
+  const heroImageId = await uploadImg(pub('landingpage.jpeg'), 'Projet architectural signé MBI')
   await payload.updateGlobal({
     slug: 'homepage',
     locale: 'fr',
     context: { disableRevalidate: true },
     data: {
-      heroEyebrow: 'Contemporary Artistic Construction',
+      heroEyebrow: 'Modern Building Industry',
       heroHeading: 'Des structures qui font avancer vos ambitions',
       heroParagraph:
-        'CAC accompagne vos projets de construction, d’équipement et de services.',
+        'MBI conçoit et réalise des solutions durables et innovantes dans la construction, les équipements et les services pour accompagner le développement de vos projets.',
       heroCtaLabel: 'Découvrir nos services',
       heroCtaHref: '#services',
       heroImage: heroImageId,
@@ -253,26 +267,26 @@ async function run() {
       heroOverlay: 66,
       servicesHeading: 'Des solutions complètes pour vos projets',
       servicesIntro:
-        'CAC accompagne vos ambitions avec des solutions adaptées à chaque secteur d’activité.',
+        'MBI met son expertise et ses moyens au service de vos ambitions avec des solutions adaptées à chaque secteur d’activité.',
       projectsHeading: 'Projets phares',
     },
   })
   await payload.updateGlobal({ slug: 'homepage', locale: 'en', context: { disableRevalidate: true }, data: {
-    heroEyebrow: 'Contemporary Artistic Construction',
+    heroEyebrow: 'Modern Building Industry',
     heroHeading: 'Structures that move your ambitions forward',
-    heroParagraph: 'CAC supports your construction, equipment and service projects.',
+    heroParagraph: 'MBI designs and delivers durable, innovative solutions in construction, equipment and services to support your projects.',
     heroCtaLabel: 'Discover our services',
     servicesHeading: 'Complete solutions for your projects',
-    servicesIntro: 'CAC supports your ambitions with solutions tailored to every sector.',
+    servicesIntro: 'MBI puts its expertise and resources at the service of your ambitions with solutions tailored to every sector.',
     projectsHeading: 'Featured projects',
   } })
   await payload.updateGlobal({ slug: 'homepage', locale: 'ar', context: { disableRevalidate: true }, data: {
-    heroEyebrow: 'Contemporary Artistic Construction',
+    heroEyebrow: 'Modern Building Industry',
     heroHeading: 'هياكل تدفع طموحاتك إلى الأمام',
-    heroParagraph: 'تدعم CAC مشاريعكم في البناء والتجهيزات والخدمات.',
+    heroParagraph: 'تصمم MBI وتنفذ حلولاً مستدامة ومبتكرة في البناء والتجهيزات والخدمات لمواكبة تطور مشاريعك.',
     heroCtaLabel: 'اكتشف خدماتنا',
     servicesHeading: 'حلول متكاملة لمشاريعك',
-    servicesIntro: 'تدعم CAC طموحاتكم بحلول مصممة لكل قطاع نشاط.',
+    servicesIntro: 'تضع MBI خبرتها ومواردها في خدمة طموحاتك بحلول مصممة لكل قطاع نشاط.',
     projectsHeading: 'مشاريع مميزة',
   } })
   payload.logger.info('Updated Homepage')
@@ -281,7 +295,7 @@ async function run() {
   let subCount = 0
   for (const cat of categories) {
     const coverId = cat.img
-      ? await uploadImg(pub(`services/${cat.img}`), `${cat.title.fr} — CAC`)
+      ? await uploadImg(pub(`services/${cat.img}`), `${cat.title.fr} — MBI`)
       : undefined
     const catFr = await payload.create({
       collection: 'service-categories',
@@ -327,35 +341,35 @@ async function run() {
   }
   payload.logger.info(`Seeded ${categories.length} categories + ${subCount} sub-services`)
 
-  // 5. House advertisements (placeholder creatives until CAC supplies real ones)
+  // 5. House advertisements (placeholder creatives until MBI supplies real ones)
   const adsCount = await payload.count({ collection: 'advertisements' })
   if (adsCount.totalDocs === 0) {
     const m1 = await payload.create({
       collection: 'media',
       context: { disableRevalidate: true },
-      filePath: cacLogoPath,
-      data: { alt: 'Publicité CAC', decorative: false },
+      filePath: asset('ad-house-1.png'),
+      data: { alt: 'Publicité MBI', decorative: false },
     })
     const m1m = await payload.create({
       collection: 'media',
       context: { disableRevalidate: true },
-      filePath: cacLogoPath,
-      data: { alt: 'Publicité CAC', decorative: false },
+      filePath: asset('ad-house-1-mobile.png'),
+      data: { alt: 'Publicité MBI', decorative: false },
     })
     const m2 = await payload.create({
       collection: 'media',
       context: { disableRevalidate: true },
       filePath: asset('ad-house-2.png'),
-      data: { alt: 'Équipez vos espaces avec CAC', decorative: false },
+      data: { alt: 'Équipez vos espaces avec MBI', decorative: false },
     })
     await payload.create({
       collection: 'advertisements',
       context: { disableRevalidate: true },
       data: {
-        name: 'Maison — CAC (haut de rail)',
+        name: 'Maison — MBI (haut de rail)',
         desktopImage: m1.id,
         mobileImage: m1m.id,
-        alt: 'CAC — solutions de construction',
+        alt: 'MBI — solutions de construction',
         destinationUrl: '/contact',
         openIn: 'auto',
         active: true,
@@ -414,8 +428,8 @@ async function run() {
             {
               size: 'full',
               richText: rt(
-                'Contemporary Artistic Construction (CAC) accompagne des projets de construction, d’équipement et de services.',
-                'Cette présentation peut être complétée dans le CMS avec les informations institutionnelles validées de CAC.',
+                'Modern Building Industry (MBI) est une entreprise mauritanienne fondée en 2009. Véritable pionnière en Mauritanie dans le secteur des préfabriqués — notamment grâce à ses solutions en panneaux sandwich et ciment-fibre —, elle déploie une offre globale et multisectorielle.',
+                'En s’appuyant sur des matières premières issues des plus grandes entreprises turques et européennes, et en alliant une solide expertise en ingénierie, en architecture et en construction à une maîtrise pointue des infrastructures techniques, énergétiques, agricoles et industrielles, MBI s’impose comme le partenaire de référence pour la réalisation de projets complexes, de la conception architecturale jusqu’à l’équipement complet des ouvrages.',
               ),
             },
           ],
