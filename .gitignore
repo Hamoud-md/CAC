@@ -1,0 +1,55 @@
+# deps / build
+mbi-app/node_modules/
+mbi-app/.next/
+mbi-app/build/
+mbi-app/dist/
+
+# local db + media
+mbi-app/*.db
+mbi-app/*.db-*
+mbi-app/media/
+mbi-app/tsconfig.tsbuildinfo
+
+# env
+mbi-app/.env
+.env
+
+# misc
+mbi-app/.DS_Store
+mbi-app/shot.cjs
+node_modules/
+
+# local screenshots
+/mbi-shell-*.png
+/mbi-admin-*.png
+# local working screenshots (keep mbi-img.png — the approved mockup)
+/mbi-*.png
+!/mbi-img.png
+
+# db dumps
+_backups/
+*.dump
+
+# CAC copy: local-only artifacts and inherited reference material
+**/.env
+**/.env.*
+!**/.env.example
+**/*.db
+**/*.db-*
+**/*.sqlite
+**/*.sqlite-*
+**/*.sqlite3
+**/*.dump
+**/backups/
+**/public/media/
+**/PROJECT_GUIDE_AR.md
+**/node_modules/
+**/.next/
+**/.pnpm-store/
+**/tsconfig.tsbuildinfo
+/IMPLEMENTATION_PLAN.md
+/REVISIONS-2026-09-03.md
+/context.md
+/guide/
+/mbi-img.png
+/shot.cjs

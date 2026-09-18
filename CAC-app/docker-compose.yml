@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: mbi
+      POSTGRES_PASSWORD: mbi
+      POSTGRES_DB: mbi
+    volumes:
+      - mbi_pgdata:/var/lib/postgresql/data
+
+volumes:
+  mbi_pgdata:
