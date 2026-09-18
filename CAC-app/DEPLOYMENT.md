@@ -104,7 +104,7 @@ hero background images continue to fill their banners.
 2. Pull this commit and build the new Docker image with the existing production
    `NEXT_PUBLIC_SERVER_URL` build argument. Keep the old app running during build.
 3. Before switching to the new image, apply the additive SQL to the same database
-   used by the app. From `mbi-app`, with `DATABASE_URL` supplied by the server:
+   used by the app. From `CAC-app`, with `DATABASE_URL` supplied by the server:
 
    ```sh
    psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/media-display-size.sql
