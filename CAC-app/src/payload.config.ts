@@ -33,7 +33,7 @@ const isProductionRuntime = process.env.NODE_ENV === 'production' && process.env
 
 if (isProductionRuntime && !usesPostgres) {
   throw new Error(
-    'DATABASE_URL must be a postgresql:// URL in production. Configure a persistent PostgreSQL database before starting MBI.',
+    'DATABASE_URL must be a postgresql:// URL in production. Configure a persistent PostgreSQL database before starting CAC.',
   )
 }
 
@@ -76,7 +76,7 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  // Admin interface language — French by default for MBI's team.
+  // Admin interface language — French by default.
   i18n: {
     supportedLanguages: { fr, ar, en },
     fallbackLanguage: 'fr',

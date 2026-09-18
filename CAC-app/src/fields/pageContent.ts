@@ -44,7 +44,7 @@ const exampleLayout = [
       {
         size: 'full',
         richText: rt(
-          'Exemple — remplacez ce texte par la présentation de cette prestation : ce que MBI réalise, pour qui, et ce qui fait la différence.',
+          'Exemple — remplacez ce texte par la présentation de cette prestation : ce que CAC réalise, pour qui, et ce qui fait la différence.',
           'Ajoutez autant de sections que nécessaire avec le bouton ci-dessous : texte, image (avec choix du cadrage), galerie, liste de points, ou bouton.',
         ),
       },

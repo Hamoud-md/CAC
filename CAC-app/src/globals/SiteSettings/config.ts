@@ -34,14 +34,14 @@ export const SiteSettings: GlobalConfig = {
               name: 'logo',
               type: 'upload',
               relationTo: 'media',
-              label: 'Logo MBI',
+              label: 'Logo CAC',
               admin: { description: 'SVG ou PNG haute résolution. Le ratio est préservé.' },
             },
             {
               name: 'siteName',
               type: 'text',
               localized: true,
-              defaultValue: 'MBI — Modern Building Industry',
+              defaultValue: 'CAC — Contemporary Artistic Construction',
             },
             {
               name: 'tagline',

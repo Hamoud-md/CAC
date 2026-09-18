@@ -87,7 +87,7 @@
 }
 
 :root {
-  /* ---- MBI brand system — sampled from mbi-img.png ----
+  /* ---- Site visual system ----
      Restrained: mostly white + hairline borders; the indigo is used
      deliberately (contact strip, hero, primary buttons, links). */
   --mbi-purple: #281a75; /* brand indigo */

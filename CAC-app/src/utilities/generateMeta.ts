@@ -27,8 +27,8 @@ export const generateMeta = async (args: {
   const ogImage = getImageURL(doc?.meta?.image)
 
   const title = doc?.meta?.title
-    ? doc?.meta?.title + ' | MBI'
-    : 'MBI — Modern Building Industry'
+    ? doc?.meta?.title + ' | CAC'
+    : 'CAC — Contemporary Artistic Construction'
 
   return {
     description: doc?.meta?.description,

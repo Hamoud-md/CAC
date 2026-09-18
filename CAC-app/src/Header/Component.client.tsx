@@ -8,6 +8,7 @@ import type { NavCategory } from '@/lib/data'
 import { localeShort, LOCALES, type Locale } from '@/lib/locales'
 import { LocaleSwitcher } from './LocaleSwitcher'
 import { CategoryNav } from './CategoryNav'
+import { DEFAULT_LOGO_SRC } from '@/components/Logo/Logo'
 
 type Props = {
   locale: Locale
@@ -64,7 +65,7 @@ export const HeaderClient: React.FC<Props> = ({
   }, [menuOpen])
 
   const hasContact = contact.phone || contact.email || contact.address
-  const logo = logoUrl ?? '/images/mbi-logo-primary.png'
+  const logo = logoUrl ?? DEFAULT_LOGO_SRC
 
   const catLink =
     'mbi-focus flex items-center justify-between rounded-md px-1 py-3 text-[0.95rem] font-medium text-[var(--mbi-text)] border-b border-[var(--mbi-border)] last:border-b-0'
@@ -112,16 +113,16 @@ export const HeaderClient: React.FC<Props> = ({
         <div className="mbi-shell flex h-[var(--mbi-header-h)] items-center justify-between gap-6">
           <Link
             href={`/${locale}`}
-            aria-label="MBI — Modern Building Industry"
+            aria-label="CAC — Contemporary Artistic Construction"
             className="flex shrink-0 items-center"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logo}
-              alt="MBI — Modern Building Industry"
-              width={200}
-              height={100}
-              className="h-10 w-auto md:h-[3.25rem]"
+              alt="CAC — Contemporary Artistic Construction"
+              width={592}
+              height={771}
+              className="h-12 w-auto md:h-16"
             />
           </Link>
 

@@ -4,13 +4,14 @@ import { Phone, Mail, MapPin } from 'lucide-react'
 
 import { getNav, getSiteSettings } from '@/lib/data'
 import { ui, type Locale } from '@/lib/locales'
+import { DEFAULT_LOGO_SRC } from '@/components/Logo/Logo'
 
 export async function SiteFooter({ locale }: { locale: Locale }) {
   const [settings, nav] = await Promise.all([getSiteSettings(locale), getNav(locale)])
   const items = (settings?.secondaryNav ?? []).map((n) => ({ label: n.label ?? '', href: n.href ?? '#' }))
   const logoUrl =
     settings?.logo && typeof settings.logo === 'object' ? (settings.logo.url ?? null) : null
-  const logo = logoUrl ?? '/images/mbi-logo-primary.png'
+  const logo = logoUrl ?? DEFAULT_LOGO_SRC
   const t = ui[locale]
 
   return (
@@ -19,7 +20,13 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
         <div>
           <span className="inline-flex rounded-md bg-white p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logo} alt="MBI — Modern Building Industry" className="h-9 w-auto" />
+            <img
+              src={logo}
+              alt="CAC — Contemporary Artistic Construction"
+              width={592}
+              height={771}
+              className="h-16 w-auto"
+            />
           </span>
           {settings?.tagline && (
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/60">{settings.tagline}</p>
@@ -88,7 +95,7 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
 
       <div className="border-t border-white/10">
         <div className="mbi-shell py-4 text-xs text-white/40">
-          © {new Date().getFullYear()} MBI — Modern Building Industry
+          © {new Date().getFullYear()} CAC — Contemporary Artistic Construction
         </div>
       </div>
     </footer>

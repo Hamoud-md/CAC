@@ -13,10 +13,10 @@ export interface MbiContact {
 }
 
 export const mbiContact: MbiContact = {
-  // TODO(MBI): confirm these are the real contact details.
-  phone: '+222 33 86 85 55',
-  email: 'info@mbirim.com',
-  address: 'TVZ, Nouakchott, Mauritanie',
+  // Populate through Site Settings once CAC's approved contact details are available.
+  phone: '',
+  email: '',
+  address: '',
 }
 
 export interface MbiNavItem {
