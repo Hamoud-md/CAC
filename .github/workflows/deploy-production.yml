@@ -1,0 +1,83 @@
+name: Deploy production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Run repository checks
+        run: bash ./ops/ci-check.sh
+
+      - name: Prepare restricted SSH
+        env:
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          PROD_SSH_HOST_KEY: ${{ secrets.PROD_SSH_HOST_KEY }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$PROD_SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$PROD_SSH_HOST_KEY" > ~/.ssh/known_hosts
+
+      - name: Package exact commit
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json,os,pathlib
+          pathlib.Path('.bessma-release.json').write_text(json.dumps({'repository':os.environ['REPOSITORY'],'sha':os.environ['SHA']})+'\n')
+          PY
+          tar --exclude=.git --exclude=node_modules --exclude=.env --exclude=uploads --exclude=instance-backups --exclude=backups -czf /tmp/release.tar.gz .
+
+      - name: Deploy with backup and rollback
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+          DEPLOY_PROJECT: ${{ vars.DEPLOY_PROJECT }}
+          SHA: ${{ github.sha }}
+        run: |
+          cat /tmp/release.tar.gz | ssh -i ~/.ssh/deploy_key -p "${PROD_SSH_PORT:-22}" \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=30 -o ServerAliveCountMax=120 \
+            bessma-deploy@"$PROD_SSH_HOST" "deploy $SHA"
+
+  notify-on-failure:
+    needs: verify-and-deploy
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Prepare restricted notification connection
+        env:
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          PROD_SSH_HOST_KEY: ${{ secrets.PROD_SSH_HOST_KEY }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$PROD_SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$PROD_SSH_HOST_KEY" > ~/.ssh/known_hosts
+
+      - name: Email deployment failure
+        env:
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+          SHA: ${{ github.sha }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "${PROD_SSH_PORT:-22}" \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            bessma-deploy@"$PROD_SSH_HOST" "notify $SHA"
