@@ -72,6 +72,7 @@ describe('persistent media serving', () => {
     await writeFile(path.join(mediaRoot, 'image.webp'), 'image-data')
     await writeFile(path.join(mediaRoot, 'icon.svg'), '<svg/>')
     const image = await serveMediaFile(request(), 'image.webp', mediaRoot)
+    expect(image.status).toBe(200)
     expect(image.headers.get('content-type')).toBe('image/webp')
     await image.arrayBuffer()
     const svg = await serveMediaFile(request(), 'icon.svg', mediaRoot)

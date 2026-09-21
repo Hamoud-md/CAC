@@ -22,6 +22,21 @@ afterEach(() => {
 })
 
 describe('project and service media carousel', () => {
+  it('renders an image-only gallery without scheduling a blank transition', () => {
+    vi.useFakeTimers()
+    render(<ContentMediaCarousel media={[image]} />)
+    act(() => vi.advanceTimersByTime(15000))
+    expect(screen.getByTestId('content-media-1')).toBeTruthy()
+  })
+
+  it('keeps a single video selected after it ends', () => {
+    vi.useFakeTimers()
+    render(<ContentMediaCarousel media={[video]} />)
+    fireEvent.ended(screen.getByTestId('content-media-2'))
+    act(() => vi.advanceTimersByTime(15000))
+    expect(screen.getByTestId('content-media-2')).toBeTruthy()
+  })
+
   it('uses the image interval, then keeps the video active until it ends', () => {
     vi.useFakeTimers()
     render(<ContentMediaCarousel media={[image, video]} />)

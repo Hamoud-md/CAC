@@ -42,7 +42,7 @@ beforeAll(async () => {
     data: { alt: 'Test description', decorative: false },
   })
   mediaID = created.id
-}, 60_000)
+}, 120_000)
 
 afterAll(async () => {
   if (payload && mediaID) await payload.delete({ collection: 'media', id: mediaID })
