@@ -60,4 +60,16 @@ describe('advertisement carousel', () => {
     act(() => vi.advanceTimersByTime(1))
     expect(screen.getByTestId('media-3')).toBeTruthy()
   })
+
+  it('advances between two videos only when each video ends', () => {
+    vi.useFakeTimers()
+    render(<AdCreativeCarousel {...props} media={[video, { ...video, id: 4 }]} />)
+    expect(screen.getByTestId('media-2')).toBeTruthy()
+    act(() => vi.advanceTimersByTime(15000))
+    expect(screen.getByTestId('media-2')).toBeTruthy()
+    fireEvent.ended(screen.getByTestId('media-2'))
+    expect(screen.getByTestId('media-4')).toBeTruthy()
+    fireEvent.ended(screen.getByTestId('media-4'))
+    expect(screen.getByTestId('media-2')).toBeTruthy()
+  })
 })
