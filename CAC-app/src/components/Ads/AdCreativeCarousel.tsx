@@ -17,13 +17,38 @@ export function AdCreativeCarousel({ alt, href, media, newTab }: Props) {
 
   useEffect(() => {
     if (media.length < 2 || activeIsVideo) return
-    const timer = window.setTimeout(() => setActiveIndex((current) => (current + 1) % media.length), ROTATION_INTERVAL_MS)
+    const timer = window.setTimeout(
+      () => setActiveIndex((current) => (current + 1) % media.length),
+      ROTATION_INTERVAL_MS,
+    )
     return () => window.clearTimeout(timer)
   }, [activeIndex, activeIsVideo, media.length])
 
   if (!activeMedia) return null
-  const creative = <Media key={activeMedia.id} resource={activeMedia} alt={alt} imgClassName="h-auto w-full rounded-[var(--mbi-radius)] border border-[var(--mbi-border)]" videoClassName="h-auto w-full rounded-[var(--mbi-radius)] border border-[var(--mbi-border)]" videoLoop={media.length === 1} onVideoEnded={() => media.length > 1 && setActiveIndex((current) => (current + 1) % media.length)} />
+  const creative = (
+    <Media
+      key={activeMedia.id}
+      resource={activeMedia}
+      alt={alt}
+      showDescription={false}
+      imgClassName="h-auto w-full rounded-[var(--mbi-radius)] border border-[var(--mbi-border)]"
+      videoClassName="h-auto w-full rounded-[var(--mbi-radius)] border border-[var(--mbi-border)]"
+      videoLoop={media.length === 1}
+      onVideoEnded={() =>
+        media.length > 1 && setActiveIndex((current) => (current + 1) % media.length)
+      }
+    />
+  )
 
   if (!href) return <div>{creative}</div>
-  return <a href={href} aria-label={alt} {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})} className="mbi-focus block rounded-[var(--mbi-radius)]">{creative}</a>
+  return (
+    <a
+      href={href}
+      aria-label={alt}
+      {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      className="mbi-focus block rounded-[var(--mbi-radius)]"
+    >
+      {creative}
+    </a>
+  )
 }

@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
 import type { Locale } from './locales'
+import { applyExactMediaText } from '@/utilities/applyExactMediaText'
 
 /**
  * Public data-loading contracts. Every read is cached and tagged so a Payload
@@ -15,7 +16,8 @@ export const getSiteSettings = (locale: Locale) =>
   unstable_cache(
     async () => {
       const payload = await payloadClient()
-      return payload.findGlobal({ slug: 'site-settings', locale, depth: 1 })
+      const settings = await payload.findGlobal({ slug: 'site-settings', locale, depth: 1 })
+      return applyExactMediaText(payload, settings, locale)
     },
     ['site-settings', locale],
     { tags: ['site-settings'] },
@@ -25,7 +27,8 @@ export const getHomepage = (locale: Locale) =>
   unstable_cache(
     async () => {
       const payload = await payloadClient()
-      return payload.findGlobal({ slug: 'homepage', locale, depth: 1 })
+      const homepage = await payload.findGlobal({ slug: 'homepage', locale, depth: 1 })
+      return applyExactMediaText(payload, homepage, locale)
     },
     ['homepage', locale],
     { tags: ['homepage'] },
@@ -51,7 +54,12 @@ export const getNavPages = (locale: Locale) =>
     { tags: ['pages'] },
   )()
 
-export type NavSubService = { id: number | string; title: string; slug: string; summary?: string | null }
+export type NavSubService = {
+  id: number | string
+  title: string
+  slug: string
+  summary?: string | null
+}
 export type NavCategory = {
   id: number | string
   title: string
@@ -139,7 +147,7 @@ export const getCategoryBySlug = (slug: string, locale: Locale) =>
         limit: 200,
         pagination: false,
       })
-      return { category, services: subRes.docs }
+      return applyExactMediaText(payload, { category, services: subRes.docs }, locale)
     },
     ['category', slug, locale],
     { tags: ['service-categories', 'services', `category:${slug}`] },
@@ -158,14 +166,14 @@ export const getServiceBySlug = (categorySlug: string, serviceSlug: string, loca
         pagination: false,
       })
       // Disambiguate by parent category slug (two services could share a slug across categories).
-      return (
+      const service =
         res.docs.find((s) => {
           const cat = s.category
           return typeof cat === 'object' && cat && String(cat.slug) === categorySlug
         }) ??
         res.docs[0] ??
         null
-      )
+      return service ? applyExactMediaText(payload, service, locale) : null
     },
     ['service', categorySlug, serviceSlug, locale],
     { tags: ['services', `service:${serviceSlug}`] },
@@ -184,7 +192,7 @@ export const getProjects = (locale: Locale) =>
         limit: 200,
         pagination: false,
       })
-      return res.docs
+      return applyExactMediaText(payload, res.docs, locale)
     },
     ['projects-list', locale],
     { tags: ['projects'] },
@@ -202,7 +210,8 @@ export const getProjectBySlug = (slug: string, locale: Locale) =>
         limit: 1,
         pagination: false,
       })
-      return res.docs[0] ?? null
+      const project = res.docs[0]
+      return project ? applyExactMediaText(payload, project, locale) : null
     },
     ['project', slug, locale],
     { tags: ['projects', `project:${slug}`] },
@@ -221,7 +230,7 @@ export const getFeaturedProjects = (locale: Locale) =>
         limit: 6,
         pagination: false,
       })
-      return res.docs
+      return applyExactMediaText(payload, res.docs, locale)
     },
     ['featured-projects', locale],
     { tags: ['projects'] },
