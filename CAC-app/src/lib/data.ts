@@ -4,6 +4,7 @@ import configPromise from '@payload-config'
 
 import type { Locale } from './locales'
 import { applyExactMediaText } from '@/utilities/applyExactMediaText'
+import { MEDIA_CONTENT_TAG } from '@/utilities/cacheTags'
 
 /**
  * Public data-loading contracts. Every read is cached and tagged so a Payload
@@ -20,7 +21,7 @@ export const getSiteSettings = (locale: Locale) =>
       return applyExactMediaText(payload, settings, locale)
     },
     ['site-settings', locale],
-    { tags: ['site-settings'] },
+    { tags: ['site-settings', MEDIA_CONTENT_TAG] },
   )()
 
 export const getHomepage = (locale: Locale) =>
@@ -31,7 +32,7 @@ export const getHomepage = (locale: Locale) =>
       return applyExactMediaText(payload, homepage, locale)
     },
     ['homepage', locale],
-    { tags: ['homepage'] },
+    { tags: ['homepage', MEDIA_CONTENT_TAG] },
   )()
 
 export const getNavPages = (locale: Locale) =>
@@ -150,7 +151,7 @@ export const getCategoryBySlug = (slug: string, locale: Locale) =>
       return applyExactMediaText(payload, { category, services: subRes.docs }, locale)
     },
     ['category', slug, locale],
-    { tags: ['service-categories', 'services', `category:${slug}`] },
+    { tags: ['service-categories', 'services', `category:${slug}`, MEDIA_CONTENT_TAG] },
   )()
 
 export const getServiceBySlug = (categorySlug: string, serviceSlug: string, locale: Locale) =>
@@ -176,7 +177,7 @@ export const getServiceBySlug = (categorySlug: string, serviceSlug: string, loca
       return service ? applyExactMediaText(payload, service, locale) : null
     },
     ['service', categorySlug, serviceSlug, locale],
-    { tags: ['services', `service:${serviceSlug}`] },
+    { tags: ['services', `service:${serviceSlug}`, MEDIA_CONTENT_TAG] },
   )()
 
 export const getProjects = (locale: Locale) =>
@@ -195,7 +196,7 @@ export const getProjects = (locale: Locale) =>
       return applyExactMediaText(payload, res.docs, locale)
     },
     ['projects-list', locale],
-    { tags: ['projects'] },
+    { tags: ['projects', MEDIA_CONTENT_TAG] },
   )()
 
 export const getProjectBySlug = (slug: string, locale: Locale) =>
@@ -214,7 +215,7 @@ export const getProjectBySlug = (slug: string, locale: Locale) =>
       return project ? applyExactMediaText(payload, project, locale) : null
     },
     ['project', slug, locale],
-    { tags: ['projects', `project:${slug}`] },
+    { tags: ['projects', `project:${slug}`, MEDIA_CONTENT_TAG] },
   )()
 
 export const getFeaturedProjects = (locale: Locale) =>
@@ -233,5 +234,5 @@ export const getFeaturedProjects = (locale: Locale) =>
       return applyExactMediaText(payload, res.docs, locale)
     },
     ['featured-projects', locale],
-    { tags: ['projects'] },
+    { tags: ['projects', MEDIA_CONTENT_TAG] },
   )()

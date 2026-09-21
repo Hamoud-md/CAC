@@ -5,6 +5,7 @@ import configPromise from '@payload-config'
 import type { Advertisement } from '@/payload-types'
 import type { Locale } from './locales'
 import { applyExactMediaText } from '@/utilities/applyExactMediaText'
+import { MEDIA_CONTENT_TAG } from '@/utilities/cacheTags'
 
 export type PageContext =
   | { type: 'all' }
@@ -30,7 +31,7 @@ const getActiveAds = (locale: Locale) =>
       return applyExactMediaText(payload, res.docs, locale)
     },
     ['active-ads', locale],
-    { tags: ['ads'] },
+    { tags: ['ads', MEDIA_CONTENT_TAG] },
   )()
 
 const relSlugs = (v: unknown): string[] => {
