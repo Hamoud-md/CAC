@@ -63,7 +63,12 @@ describe('persistent media serving', () => {
   })
 
   it('rejects lexical and encoded traversal', async () => {
-    for (const filename of ['../secrets.txt', '..\\secrets.txt', '%2e%2e%2fsecrets.txt', '%252e%252e%252fsecrets.txt']) {
+    for (const filename of [
+      '../secrets.txt',
+      '..\\secrets.txt',
+      '%2e%2e%2fsecrets.txt',
+      '%252e%252e%252fsecrets.txt',
+    ]) {
       expect((await serveMediaFile(request(), filename, mediaRoot)).status).toBe(404)
     }
   })
@@ -95,5 +100,23 @@ describe('persistent media serving', () => {
     const response = await serveMediaFile(request(), 'example.mp4', mediaRoot)
     expect(response.status).toBe(200)
     expect(await response.text()).toBe('new-video')
+  })
+
+  it('closes an aborted response stream without an uncaught controller error', async () => {
+    await writeFile(path.join(mediaRoot, 'example.mp4'), Buffer.alloc(1024 * 1024, 7))
+    const uncaught: unknown[] = []
+    const recordUncaught = (error: unknown) => uncaught.push(error)
+    process.on('uncaughtExceptionMonitor', recordUncaught)
+
+    try {
+      const response = await serveMediaFile(request(), 'example.mp4', mediaRoot)
+      const reader = response.body!.getReader()
+      expect((await reader.read()).done).toBe(false)
+      await expect(reader.cancel('client navigated away')).resolves.toBeUndefined()
+      await new Promise<void>((resolve) => setImmediate(resolve))
+      expect(uncaught).toEqual([])
+    } finally {
+      process.off('uncaughtExceptionMonitor', recordUncaught)
+    }
   })
 })

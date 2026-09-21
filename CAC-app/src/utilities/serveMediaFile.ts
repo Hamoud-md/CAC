@@ -1,7 +1,6 @@
 import { createReadStream } from 'node:fs'
 import { realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
-import { Readable } from 'node:stream'
 
 const mimeTypes: Record<string, string> = {
   '.avif': 'image/avif',
@@ -65,8 +64,46 @@ function parseRange(value: string, size: number): { start: number; end: number }
   return { start, end: Math.min(requestedEnd, size - 1) }
 }
 
+function streamFile(
+  filePath: string,
+  range?: { start: number; end: number },
+): ReadableStream<Uint8Array> {
+  const source = createReadStream(filePath, range)
+  const iterator = source[Symbol.asyncIterator]()
+  let canceled = false
+
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      try {
+        const result = await iterator.next()
+        if (canceled) return
+        if (result.done) {
+          controller.close()
+          return
+        }
+
+        const chunk = result.value
+        controller.enqueue(new Uint8Array(chunk.buffer, chunk.byteOffset, chunk.byteLength))
+      } catch (error) {
+        // Cancellation destroys the Node stream and rejects a pending read. The
+        // Web stream is already closed in that case, so touching its controller
+        // would raise ERR_INVALID_STATE. Real file errors still reach consumers.
+        if (!canceled) controller.error(error)
+      }
+    },
+    cancel() {
+      canceled = true
+      source.destroy()
+    },
+  })
+}
+
 /** Read an uploaded file at request time rather than relying on Next's public-file index. */
-export async function serveMediaFile(request: Request, rawFilename: string, mediaRoot: string): Promise<Response> {
+export async function serveMediaFile(
+  request: Request,
+  rawFilename: string,
+  mediaRoot: string,
+): Promise<Response> {
   const filename = safeFilename(rawFilename)
   if (!filename) return notFound()
 
@@ -77,9 +114,18 @@ export async function serveMediaFile(request: Request, rawFilename: string, medi
 
   try {
     // Reject symlinks pointing outside the volume as well as lexical traversal.
-    const [realRoot, realFile, fileStats] = await Promise.all([realpath(root), realpath(filePath), stat(filePath)])
+    const [realRoot, realFile, fileStats] = await Promise.all([
+      realpath(root),
+      realpath(filePath),
+      stat(filePath),
+    ])
     const realRelative = path.relative(realRoot, realFile)
-    if (!realRelative || realRelative.startsWith('..') || path.isAbsolute(realRelative) || !fileStats.isFile()) {
+    if (
+      !realRelative ||
+      realRelative.startsWith('..') ||
+      path.isAbsolute(realRelative) ||
+      !fileStats.isFile()
+    ) {
       return notFound()
     }
 
@@ -106,8 +152,7 @@ export async function serveMediaFile(request: Request, rawFilename: string, medi
     if (range) headers.set('Content-Range', `bytes ${start}-${end}/${fileStats.size}`)
 
     if (request.method === 'HEAD') return new Response(null, { status: 200, headers })
-    const stream = createReadStream(realFile, range ? { start, end } : undefined)
-    return new Response(Readable.toWeb(stream) as ReadableStream<Uint8Array>, {
+    return new Response(streamFile(realFile, range ? { start, end } : undefined), {
       status: range ? 206 : 200,
       headers,
     })
