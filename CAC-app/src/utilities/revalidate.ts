@@ -13,3 +13,13 @@ export function safeRevalidateTag(tag: string): void {
     throw err
   }
 }
+
+/** Expire a tag synchronously so the next request cannot receive stale CMS data. */
+export function safeExpireTag(tag: string): void {
+  try {
+    nextRevalidateTag(tag, { expire: 0 })
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('static generation store missing')) return
+    throw err
+  }
+}

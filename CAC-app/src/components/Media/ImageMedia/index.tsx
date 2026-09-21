@@ -79,7 +79,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
     width = fullWidth!
     height = fullHeight!
     displayHeight = configuredHeight
-    alt = altFromResource || ''
+    alt = resource.decorative ? '' : (altFromProps ?? altFromResource ?? '')
 
     const fx = (resource as { focalX?: number | null }).focalX
     const fy = (resource as { focalY?: number | null }).focalY

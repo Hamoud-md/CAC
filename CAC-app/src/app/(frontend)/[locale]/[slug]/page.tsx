@@ -13,6 +13,7 @@ import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { isLocale, type Locale } from '@/lib/locales'
+import { applyExactMediaText } from '@/utilities/applyExactMediaText'
 
 // Rendered on demand so published edits appear immediately (context.md §11.4).
 export const dynamic = 'force-dynamic'
@@ -84,5 +85,6 @@ const queryPageBySlug = cache(async ({ slug, locale }: { slug: string; locale: L
     where: { slug: { equals: slug } },
   })
 
-  return result.docs?.[0] || null
+  const page = result.docs?.[0]
+  return page ? applyExactMediaText(payload, page, locale) : null
 })

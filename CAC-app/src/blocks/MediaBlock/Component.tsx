@@ -4,6 +4,7 @@ import React from 'react'
 import type { MediaBlock as MediaBlockProps } from '@/payload-types'
 
 import { Media } from '../../components/Media'
+import { getMediaDescription } from '@/utilities/mediaDescription'
 
 type Props = MediaBlockProps & {
   className?: string
@@ -22,7 +23,7 @@ export const MediaBlock: React.FC<Props> = ({ media, ratio, caption, className, 
   if (!media) return null
   const fixed = ratio && ratio !== 'auto' ? ratioClass[ratio] : null
   const resource = typeof media === 'object' ? media : null
-  const description = resource && !resource.decorative ? resource.alt : null
+  const description = getMediaDescription(resource)
 
   return (
     <figure
@@ -36,7 +37,12 @@ export const MediaBlock: React.FC<Props> = ({ media, ratio, caption, className, 
             fixed,
           )}
         >
-          <Media resource={media} fill imgClassName={cn('object-cover', imgClassName)} />
+          <Media
+            resource={media}
+            fill
+            showDescription={false}
+            imgClassName={cn('object-cover', imgClassName)}
+          />
         </div>
       ) : (
         <Media

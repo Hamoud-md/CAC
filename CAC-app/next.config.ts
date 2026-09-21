@@ -53,6 +53,15 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: true,
   redirects,
+  // Payload uploads can arrive after Next has indexed public/ at startup.
+  // Route /media through a request-time reader of the persistent media volume.
+  async rewrites() {
+    return {
+      beforeFiles: [{ source: '/media/:path*', destination: '/media-runtime/:path*' }],
+      afterFiles: [],
+      fallback: [],
+    }
+  },
   turbopack: {
     root: path.resolve(dirname),
   },

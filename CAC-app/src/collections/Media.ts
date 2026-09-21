@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url'
 
 import { anyone } from '../access/anyone'
 import { isStaff } from '../access/roles'
+import { revalidateMedia, revalidateMediaDelete } from './Media/hooks/revalidateMedia'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -78,6 +79,8 @@ export const Media: CollectionConfig = {
     },
   ],
   hooks: {
+    afterChange: [revalidateMedia],
+    afterDelete: [revalidateMediaDelete],
     beforeValidate: [
       ({ data }) => {
         if (data && !data.decorative && !data.alt) {
