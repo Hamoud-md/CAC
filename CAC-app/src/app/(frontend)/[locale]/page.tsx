@@ -7,6 +7,8 @@ import { isLocale, ui, type Locale } from '@/lib/locales'
 import { notFound } from 'next/navigation'
 import { Media } from '@/components/Media'
 import { AdInFlow } from '@/components/Ads/AdInFlow'
+import Image from 'next/image'
+import { CAC_NAME } from '@/components/site/brand'
 import { ChevronRight } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -41,7 +43,7 @@ export default async function HomePage({ params }: Args) {
           overlayPct - 35,
           0,
         )}%, transparent) 100%)`
-      : `linear-gradient(120deg, ${overlayBase} 0%, color-mix(in srgb, ${overlayBase} 82%, #4b2fae) 60%, ${overlayBase} 100%)`
+      : `linear-gradient(120deg, ${overlayBase} 0%, color-mix(in srgb, ${overlayBase} 82%, #60083b) 60%, ${overlayBase} 100%)`
 
   const ctaHref = home?.heroCtaHref ?? '#services'
   const servicesEyebrow = home?.servicesEyebrow || t.ourServices
@@ -50,31 +52,44 @@ export default async function HomePage({ params }: Args) {
   return (
     <div className="flex flex-col gap-16 py-2 md:gap-20">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-xl text-white">
-        <div className="absolute inset-0 -z-20 bg-[var(--mbi-purple-dark)]" />
-        {heroImg && (
-          <div className="absolute inset-0 -z-10">
-            <Media resource={heroImg} fill imgClassName="object-cover" priority />
-          </div>
-        )}
-        <div className="absolute inset-0 -z-10" style={{ background: veil }} />
-        <div className="relative flex min-h-[19rem] max-w-[34rem] flex-col items-start justify-center px-6 py-12 sm:min-h-[22rem] sm:px-9 sm:py-14 md:min-h-[25rem] md:px-12">
+      <section className="cac-hero">
+        <div className="cac-hero-image">
+          {heroImg && (
+            <div className="absolute inset-0">
+              <Media resource={heroImg} fill imgClassName="object-cover" priority />
+            </div>
+          )}
+          {!heroImg && (
+            <Image
+              src="/images/hero.webp"
+              alt=""
+              fill
+              priority
+              sizes="(min-width: 768px) 55vw, 100vw"
+              className="object-cover"
+            />
+          )}
+          <div className="cac-hero-veil" style={{ background: veil }} />
+          <span className="cac-hero-signature" aria-hidden="true">
+            CAC / 01
+          </span>
+        </div>
+        <div className="cac-hero-copy">
+          <p className="mbi-eyebrow">Contemporary Artistic Construction</p>
           {home?.heroEyebrow && (
-            <p className="text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-white/65">
+            <p className="text-[0.75rem] font-semibold uppercase tracking-[0.18em] text-[var(--mbi-purple)]">
               {home.heroEyebrow}
             </p>
           )}
-          <h1 className="mt-4 text-[clamp(1.9rem,6vw,3.15rem)] font-bold leading-[1.1] text-white">
-            {home?.heroHeading ?? 'MBI'}
-          </h1>
+          <h1 className="cac-hero-title">{home?.heroHeading ?? 'CAC'}</h1>
           {home?.heroParagraph && (
-            <p className="mt-5 max-w-[30rem] text-[0.9375rem] leading-relaxed text-white/80 sm:text-base">
+            <p className="mt-5 max-w-[30rem] text-[0.9375rem] leading-relaxed text-[var(--mbi-text-soft)] sm:text-base">
               {home.heroParagraph}
             </p>
           )}
           <Link
             href={ctaHref.startsWith('#') ? ctaHref : `/${locale}${ctaHref}`}
-            className="mbi-btn mbi-btn-light mbi-focus mt-8"
+            className="mbi-btn mbi-btn-primary mbi-focus mt-8"
           >
             {home?.heroCtaLabel ?? t.discoverServices}
             <span aria-hidden className="inline-block rtl:rotate-180">
@@ -91,18 +106,23 @@ export default async function HomePage({ params }: Args) {
         <section id="services" className="scroll-mt-[calc(var(--mbi-sticky-offset)+1rem)]">
           <p className="mbi-eyebrow">{servicesEyebrow}</p>
           {home?.servicesHeading && (
-            <h2 className="mt-2 text-[clamp(1.45rem,3.5vw,2rem)] font-bold">{home.servicesHeading}</h2>
+            <h2 className="mt-2 text-[clamp(1.45rem,3.5vw,2rem)] font-bold">
+              {home.servicesHeading}
+            </h2>
           )}
           {home?.servicesIntro && (
             <p className="mt-3 max-w-[44rem] text-[var(--mbi-text-soft)]">{home.servicesIntro}</p>
           )}
-          <ul className="mt-8 grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-            {categories.map((c) => (
+          <ul className="cac-service-list mt-8">
+            {categories.map((c, index) => (
               <li key={c.id}>
                 <Link
                   href={`/${locale}/services/${c.slug}`}
-                  className="mbi-card mbi-focus group flex h-full flex-col justify-between gap-3 p-5 text-[var(--mbi-text)] transition-colors hover:border-[var(--mbi-purple)]"
+                  className="cac-service-card mbi-focus group"
                 >
+                  <span className="cac-service-number" aria-hidden="true">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
                   <div>
                     <p className="font-semibold leading-snug">{c.title}</p>
                     {c.summary && (
@@ -138,19 +158,21 @@ export default async function HomePage({ params }: Args) {
         <section>
           <p className="mbi-eyebrow">{projectsEyebrow}</p>
           {home?.projectsHeading && (
-            <h2 className="mt-2 text-[clamp(1.45rem,3.5vw,2rem)] font-bold">{home.projectsHeading}</h2>
+            <h2 className="mt-2 text-[clamp(1.45rem,3.5vw,2rem)] font-bold">
+              {home.projectsHeading}
+            </h2>
           )}
           {home?.projectsIntro && (
             <p className="mt-3 max-w-[44rem] text-[var(--mbi-text-soft)]">{home.projectsIntro}</p>
           )}
-          <ul className="mt-8 grid gap-4 sm:grid-cols-2 sm:gap-6">
+          <ul className="cac-project-grid mt-8">
             {projects.map((p) => {
               const cover = p.coverImage && typeof p.coverImage === 'object' ? p.coverImage : null
               return (
                 <li key={p.id}>
                   <Link
                     href={`/${locale}/projets/${p.slug}`}
-                    className="mbi-card mbi-focus group block overflow-hidden transition-colors hover:border-[var(--mbi-purple)]"
+                    className="cac-project-card mbi-focus group block overflow-hidden"
                   >
                     {cover && (
                       <div className="aspect-[16/10] overflow-hidden bg-[var(--mbi-surface-muted)]">
@@ -185,7 +207,7 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const locale = (isLocale(raw) ? raw : 'fr') as Locale
   const [home, settings] = await Promise.all([getHomepage(locale), getSiteSettings(locale)])
   return {
-    title: settings?.defaultMetaTitle ?? settings?.siteName ?? 'MBI — Modern Building Industry',
+    title: settings?.defaultMetaTitle ?? settings?.siteName ?? CAC_NAME,
     description: settings?.defaultMetaDescription ?? home?.heroParagraph ?? undefined,
   }
 }
