@@ -634,17 +634,31 @@
 .cac-project-card:hover img {
   transform: scale(1.025);
 }
-.cac-ad-band {
-  margin-block: 4rem 1rem;
-  padding-block: 2rem;
-  border-block: 1px solid #ded7d4;
-  background: #f6f3ee;
+.cac-ad-sidebar {
+  align-self: start;
+  padding: 1rem;
+  border: 1px solid var(--mbi-border);
+  border-top: 3px solid var(--mbi-purple);
+  border-radius: var(--mbi-radius);
+  background: var(--mbi-surface-muted);
+  overflow-wrap: anywhere;
 }
-.cac-ad-band > div > .flex {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: start;
-  padding-inline: 2rem;
+@media (width >= 64rem) {
+  .cac-content {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    align-items: start;
+    column-gap: 2rem;
+  }
+  .cac-content > main {
+    container-type: inline-size;
+  }
+  .cac-content .cac-hero-copy {
+    padding: clamp(1.5rem, 4cqi, 4rem);
+  }
+  .cac-content .cac-hero-title {
+    font-size: clamp(2.4rem, 5.6cqi, 4.6rem);
+  }
 }
 .cac-public footer {
   border-top: 6px solid #60083b;

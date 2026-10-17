@@ -21,7 +21,7 @@ import { pageContextFromHeaders } from '@/lib/pageContext'
 import { Providers } from '@/providers'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { getServerSideURL } from '@/utilities/getURL'
-import { LOCALES, dir, isLocale, type Locale } from '@/lib/locales'
+import { LOCALES, dir, isLocale, ui, type Locale } from '@/lib/locales'
 
 import '../globals.css'
 
@@ -64,12 +64,12 @@ export default async function LocaleLayout({ children, params }: Args) {
 
           <SiteHeader locale={locale as Locale} />
 
-          {/* Full-width editorial content; existing desktop ads follow the page. */}
+          {/* Desktop rail mirrors with the document direction; narrow screens use in-flow ads. */}
           <div className="mbi-shell cac-content w-full flex-1 py-8 md:py-12">
             <main id="main-content" tabIndex={-1} className="min-w-0">
               {children}
             </main>
-            <aside className="cac-ad-band hidden lg:block min-w-0" aria-label="Publicité">
+            <aside className="cac-ad-sidebar hidden lg:block min-w-0" aria-label={ui[locale].advertisement}>
               <AdRail locale={locale as Locale} pageContext={adContext} />
             </aside>
           </div>
