@@ -30,7 +30,9 @@ container was removed after the test.
 
 Merge into main triggers the single production workflow after its checks pass.
 Do not start a second deployment while that workflow is running. Its public
-health checks cover FR, EN and AR. Verify the resulting container image SHA,
+health checks cover FR, EN and AR. The private preview also follows project links
+from those homepages, and the switch waits for the exact live image to be healthy.
+Verify the resulting container image SHA,
 the unchanged database/media mounts, and MBI's unchanged image/start time after
 release. A source-only rollback cannot undo a database migration, so migrations
 require a separate approved release plan.

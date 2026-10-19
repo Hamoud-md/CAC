@@ -43,6 +43,17 @@ class CandidatePreviewTests(unittest.TestCase):
         self.assertEqual(calls[-1], ['docker', 'rm', '-f', f'cac-main-preview-{self.sha[:12]}'])
         self.assertFalse(any('up' in command for command in calls))
 
+    def test_health_gate_waits_for_the_exact_live_image(self):
+        def container(health):
+            return json.dumps([{'Config': {'Image': f'cac-main-app:{self.sha}'},
+                                'State': {'Status': 'running', 'Health': {'Status': health}}}])
+        with patch.object(self.deployment, 'call', side_effect=[container('starting'), container('healthy')]), patch.object(self.deployment.time, 'sleep') as sleep:
+            self.deployment.wait_healthy(self.sha)
+        sleep.assert_called_once_with(2)
+        with patch.object(self.deployment, 'call', return_value=container('healthy')):
+            with self.assertRaisesRegex(RuntimeError, 'does not match'):
+                self.deployment.wait_healthy('b' * 40)
+
     def test_existing_environment_file_is_preserved_when_exclusive_creation_fails(self):
         self.path.write_text('existing-file-must-survive')
         config = json.dumps({'services': {'app': {'environment': {}}}})
