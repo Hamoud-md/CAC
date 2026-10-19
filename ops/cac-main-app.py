@@ -7,6 +7,8 @@ import re
 import subprocess
 import sys
 from urllib.parse import urlsplit
+from urllib.request import urlopen
+import time
 
 LIVE = Path('/home/bouye/apps/cac-main')
 PROJECT = 'cac-main'
@@ -57,13 +59,49 @@ def preflight(sha):
         raise RuntimeError('Unexpected CAC port binding')
     # The shared backup program cleans expired failed staging directories. Refuse
     # this release if that could cause cleanup outside the CAC release scope.
-    import time
     root = Path('/var/backups/bessma/staging')
     if root.exists():
         for item in root.iterdir():
             if item.is_dir() and not item.is_symlink() and (item / 'failure.txt').is_file() and time.time() - item.stat().st_mtime > 172800:
                 raise RuntimeError('Shared backup cleanup requires separate review')
     return command, env
+
+
+def preview(command, env, sha):
+    config = json.loads(call(command + ['config', '--format', 'json'], True, env))
+    values = config['services']['app']['environment']
+    name = f'cac-main-preview-{sha[:12]}'
+    path = LIVE / f'.preview-{sha[:12]}.env'
+    created = False
+    try:
+        with path.open('x', opener=lambda p, flags: os.open(p, flags, 0o600)) as output:
+            for key, value in values.items():
+                if '\n' in str(value) or '\r' in str(value):
+                    raise RuntimeError('Multiline preview environment is unsupported')
+                output.write(f'{key}={value}\n')
+        call(['docker', 'run', '-d', '--name', name, '--network', 'cac-main_default',
+              '--label', 'traefik.enable=false', '--publish', '127.0.0.1:13200:3000',
+              '--env-file', str(path), '--mount',
+              'type=volume,source=cac-main_cac_main_media,target=/app/public/media,readonly',
+              f'cac-main-app:{sha}'], True)
+        created = True
+        for route in ['/en', '/fr', '/ar', '/images/cac-logo-original.png', '/admin']:
+            for attempt in range(30):
+                try:
+                    with urlopen('http://127.0.0.1:13200' + route, timeout=10) as response:
+                        body = response.read()
+                        if response.status == 200 and body:
+                            break
+                except Exception:
+                    pass
+                time.sleep(2)
+            else:
+                raise RuntimeError(f'CAC preview failed for {route}; live app not switched')
+        print('CAC preview passed: FR/EN/AR, original logo and admin; media mounted read-only')
+    finally:
+        if created:
+            call(['docker', 'rm', '-f', name], True)
+        path.unlink(missing_ok=True)
 
 
 def main():
@@ -82,6 +120,7 @@ def main():
         raise RuntimeError('Unexpected deployment working directory')
     if mode == 'deploy':
         call(command + ['build', 'app'], env=env)
+        preview(command, env, sha)
     else:
         call(['docker', 'image', 'inspect', f'cac-main-app:{sha}'], True)
     call(command + ['up', '-d', '--no-deps', '--no-build', '--pull', 'never', 'app'], env=env)
