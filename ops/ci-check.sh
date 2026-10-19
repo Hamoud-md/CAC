@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 corepack enable
+python3 -m unittest discover -s ops/tests -p 'test_*.py'
 cd CAC-app
 export DATABASE_URL="postgresql://ci:ci@127.0.0.1:5432/unused"
 export PAYLOAD_SECRET="ci-only-not-used-in-production"
