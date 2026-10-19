@@ -2,7 +2,7 @@ import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
-import type { Locale } from './locales'
+import { DEFAULT_LOCALE, type Locale } from './locales'
 import { applyExactMediaText } from '@/utilities/applyExactMediaText'
 import { MEDIA_CONTENT_TAG } from '@/utilities/cacheTags'
 
@@ -211,7 +211,32 @@ export const getProjectBySlug = (slug: string, locale: Locale) =>
         limit: 1,
         pagination: false,
       })
-      const project = res.docs[0]
+      let project = res.docs[0]
+      if (!project && locale !== DEFAULT_LOCALE) {
+        // Lists can display a default-locale slug when its translation is empty.
+        // Filtering the localized slug column does not resolve that fallback.
+        const fallback = await payload.find({
+          collection: 'projects',
+          locale: DEFAULT_LOCALE,
+          where: { slug: { equals: slug }, _status: { equals: 'published' } },
+          depth: 0,
+          limit: 1,
+          pagination: false,
+        })
+        const id = fallback.docs[0]?.id
+        if (id !== undefined) {
+          const localized = await payload.find({
+            collection: 'projects',
+            locale,
+            where: { id: { equals: id }, _status: { equals: 'published' } },
+            depth: 2,
+            limit: 1,
+            pagination: false,
+          })
+          const candidate = localized.docs[0]
+          if (candidate?.slug === slug) project = candidate
+        }
+      }
       return project ? applyExactMediaText(payload, project, locale) : null
     },
     ['project', slug, locale],

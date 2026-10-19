@@ -87,24 +87,43 @@ def preview(command, env, sha):
               'type=volume,source=cac-main_cac_main_media,target=/app/public/media,readonly',
               f'cac-main-app:{sha}'], True)
         created = True
-        for route in ['/en', '/fr', '/ar', '/images/cac-logo-original.png', '/admin']:
+        routes = ['/en', '/fr', '/ar', '/images/cac-logo-original.png', '/admin']
+        for route in routes:
             for attempt in range(30):
                 try:
                     with urlopen('http://127.0.0.1:13200' + route, timeout=10) as response:
                         body = response.read()
                         if response.status == 200 and body:
+                            if route in {'/en', '/fr', '/ar'}:
+                                for link in re.findall(r'href="(/(?:en|fr|ar)/projets/[^"?#]+)"', body.decode(errors='replace')):
+                                    if link not in routes:
+                                        routes.append(link)
                             break
                 except Exception:
                     pass
                 time.sleep(2)
             else:
                 raise RuntimeError(f'CAC preview failed for {route}; live app not switched')
-        print('CAC preview passed: FR/EN/AR, original logo and admin; media mounted read-only')
+        print('CAC preview passed: FR/EN/AR, linked projects, original logo and admin; media mounted read-only')
     finally:
         if created:
             call(['docker', 'rm', '-f', name], True)
         if environment_created:
             path.unlink(missing_ok=True)
+
+
+def wait_healthy(sha):
+    for attempt in range(45):
+        container = json.loads(call(['docker', 'inspect', 'cac-main-app'], True))[0]
+        if container['Config']['Image'] != f'cac-main-app:{sha}':
+            raise RuntimeError('Live CAC image does not match the release')
+        state = container['State']
+        if state.get('Health', {}).get('Status') == 'healthy':
+            return
+        if state['Status'] != 'running' or state.get('Health', {}).get('Status') == 'unhealthy':
+            raise RuntimeError('Live CAC app is not healthy')
+        time.sleep(2)
+    raise RuntimeError('Live CAC health check timed out')
 
 
 def main():
@@ -127,6 +146,7 @@ def main():
     else:
         call(['docker', 'image', 'inspect', f'cac-main-app:{sha}'], True)
     call(command + ['up', '-d', '--no-deps', '--no-build', '--pull', 'never', 'app'], env=env)
+    wait_healthy(sha)
     print(f'CAC app-only {mode}: {sha}')
 
 
