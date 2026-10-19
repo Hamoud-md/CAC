@@ -10,12 +10,12 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
   const [settings, nav] = await Promise.all([getSiteSettings(locale), getNav(locale)])
   const required = ['/projets', '/a-propos', '/contact']
   const items = [
-    ...required.map((href, index) => ({ href, label: secondaryLabels[locale][index] })),
+    ...required.map((href, index) => ({ href, label: settings?.secondaryNav?.find((n) => n.href === href)?.label || secondaryLabels[locale][index] })),
     ...(settings?.secondaryNav ?? [])
       .filter((n) => !required.includes(n.href ?? ''))
       .map((n) => ({ label: n.label ?? '', href: n.href ?? '#' })),
   ]
-  const logo = CAC_LOGO
+  const logo = settings?.logo && typeof settings.logo === 'object' ? settings.logo.url || CAC_LOGO : CAC_LOGO
   const t = ui[locale]
 
   return (

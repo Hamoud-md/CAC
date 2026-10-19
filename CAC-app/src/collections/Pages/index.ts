@@ -1,3 +1,4 @@
+import { protectReferencedContent } from '../../hooks/protectReferencedContent'
 import type { CollectionConfig } from 'payload'
 import { createSlugRedirect } from '../../hooks/createSlugRedirect'
 
@@ -136,6 +137,7 @@ export const Pages: CollectionConfig<'pages'> = {
     localizedSlug('title'),
   ],
   hooks: {
+    beforeDelete: [protectReferencedContent],
     afterChange: [revalidatePage, createSlugRedirect('')],
     beforeChange: [populatePublishedAt],
     afterDelete: [revalidateDelete],

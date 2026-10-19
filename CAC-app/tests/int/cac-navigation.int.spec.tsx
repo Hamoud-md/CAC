@@ -21,6 +21,10 @@ const categories = [
 const props = { contact: { phone: null, email: null, address: null }, logoUrl: null, secondaryNav: [], categories }
 
 describe('CAC public navigation', () => {
+  it('uses the logo selected in SiteSettings', () => {
+    const { container } = render(<HeaderClient {...props} locale="en" logoUrl="/api/media/file/owner-logo.png" />)
+    expect(container.querySelector('img')?.getAttribute('src')).toBe('/api/media/file/owner-logo.png')
+  })
   it.each(['fr', 'en', 'ar'] as Locale[])(
     'keeps category relationships and main page sequence in %s',
     (locale) => {

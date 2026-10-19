@@ -1,3 +1,4 @@
+import { protectReferencedContent } from '../../hooks/protectReferencedContent'
 import type { CollectionConfig } from 'payload'
 
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
@@ -54,6 +55,7 @@ export const Services: CollectionConfig<'services'> = {
     localizedSlug('title'),
   ],
   hooks: {
+    beforeDelete: [protectReferencedContent],
     // ponytail: slug-change redirect skipped here — sub-service URLs are nested
     // under a category the hook can't resolve. Add when editors start renaming live slugs.
     afterChange: [revalidateService],
