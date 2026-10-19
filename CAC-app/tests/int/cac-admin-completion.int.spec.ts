@@ -15,8 +15,14 @@ const context = { disableRevalidate: true }
 
 beforeAll(async () => {
   root = await mkdtemp(path.join(tmpdir(), 'cac-admin-completion-'))
-  // Hard-coded isolated adapter: never inherit a database URL from dotenv or CI.
-  process.env.DATABASE_URL = `file:${path.join(root, 'test.db')}`
+  // Never inherit DATABASE_URL. Optional Postgres must be an explicitly named
+  // disposable database on loopback, not a production server or tunnel.
+  const postgres = process.env.CAC_ADMIN_TEST_DATABASE_URL
+  if (postgres) {
+    const url = new URL(postgres)
+    if (url.protocol !== 'postgresql:' || url.hostname !== '127.0.0.1' || url.pathname !== '/cac_admin_test') throw new Error('Only the isolated loopback cac_admin_test database is allowed')
+  }
+  process.env.DATABASE_URL = postgres || `file:${path.join(root, 'test.db')}`
   process.env.PAYLOAD_SECRET = 'cac-isolated-test-secret-at-least-32-characters'
   process.env.NEXT_PUBLIC_SERVER_URL = 'http://localhost:3317'
   const [{ getPayload }, { default: configPromise }] = await Promise.all([import('payload'), import('../../src/payload.config')])
