@@ -73,8 +73,10 @@ def preview(command, env, sha):
     name = f'cac-main-preview-{sha[:12]}'
     path = LIVE / f'.preview-{sha[:12]}.env'
     created = False
+    environment_created = False
     try:
-        with path.open('x', opener=lambda p, flags: os.open(p, flags, 0o600)) as output:
+        with open(path, 'x', opener=lambda p, flags: os.open(p, flags, 0o600)) as output:
+            environment_created = True
             for key, value in values.items():
                 if '\n' in str(value) or '\r' in str(value):
                     raise RuntimeError('Multiline preview environment is unsupported')
@@ -101,7 +103,8 @@ def preview(command, env, sha):
     finally:
         if created:
             call(['docker', 'rm', '-f', name], True)
-        path.unlink(missing_ok=True)
+        if environment_created:
+            path.unlink(missing_ok=True)
 
 
 def main():
