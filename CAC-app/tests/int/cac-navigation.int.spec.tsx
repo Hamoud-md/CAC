@@ -56,6 +56,17 @@ describe('CAC public navigation', () => {
     expect(within(container.querySelector<HTMLElement>('.cac-desktop-nav')!).getByRole('menu')).toBeTruthy()
   })
 
+  it('keeps the submenu open while scrolling its contents and closes it on page scroll', () => {
+    const { container } = render(<HeaderClient {...props} locale="fr" />)
+    const desktop = container.querySelector<HTMLElement>('.cac-desktop-nav')!
+    fireEvent.click(within(desktop).getByRole('button', { name: /Architecture/ }))
+    const menu = within(desktop).getByRole('menu')
+    fireEvent.scroll(menu)
+    expect(within(desktop).getByRole('menu')).toBe(menu)
+    fireEvent.scroll(window)
+    expect(within(desktop).queryByRole('menu')).toBeNull()
+  })
+
   it('supports keyboard opening, arrow navigation and Escape focus return', async () => {
     const { container } = render(<HeaderClient {...props} locale="fr" />)
     const desktop = container.querySelector<HTMLElement>('.cac-desktop-nav')!

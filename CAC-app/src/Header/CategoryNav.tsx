@@ -35,7 +35,15 @@ export function CategoryNav({
       triggerRefs.current.get(open)?.focus()
       setOpen(null)
     }
-    const onViewportChange = () => setOpen(null)
+    const onViewportChange = (event: Event) => {
+      // Captured scroll events also come from the scrollable submenu itself.
+      if (
+        event.type === 'scroll' &&
+        event.target instanceof Element &&
+        rootRef.current?.querySelector('[role="menu"]')?.contains(event.target)
+      ) return
+      setOpen(null)
+    }
     document.addEventListener('mousedown', onDoc)
     document.addEventListener('keydown', onKey)
     window.addEventListener('resize', onViewportChange)

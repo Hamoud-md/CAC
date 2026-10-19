@@ -17,7 +17,7 @@ COPY . .
 
 # Payload's config is imported during `next build`; give it non-secret build-time
 # values. Real secrets + DATABASE_URL are injected at runtime by compose.
-ARG NEXT_PUBLIC_SERVER_URL=https://mbi.yasserai.net
+ARG NEXT_PUBLIC_SERVER_URL=https://cac.yasserai.net
 ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
 ENV PAYLOAD_SECRET=build-only-not-used-at-runtime
 ENV NODE_OPTIONS=--no-deprecation
