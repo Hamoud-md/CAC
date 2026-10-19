@@ -21,7 +21,7 @@ import { pageContextFromHeaders } from '@/lib/pageContext'
 import { Providers } from '@/providers'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { getServerSideURL } from '@/utilities/getURL'
-import { LOCALES, dir, isLocale, type Locale } from '@/lib/locales'
+import { LOCALES, dir, isLocale, ui, type Locale } from '@/lib/locales'
 
 import '../globals.css'
 
@@ -49,23 +49,27 @@ export default async function LocaleLayout({ children, params }: Args) {
       suppressHydrationWarning
     >
       <head>
-        <link href="/favicon.ico" rel="icon" sizes="32x32" />
-        <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+        <link href="/images/cac-logo-original.png" rel="icon" type="image/png" />
       </head>
-      <body>
+      <body className="cac-public">
         <Providers>
+          <a href="#main-content" className="cac-skip">
+            {locale === 'ar'
+              ? 'انتقل إلى المحتوى'
+              : locale === 'en'
+                ? 'Skip to content'
+                : 'Aller au contenu'}
+          </a>
           <AdminBar adminBarProps={{ preview: isEnabled }} />
 
           <SiteHeader locale={locale as Locale} />
 
-          {/* Content + advertising rail (context.md §6). Single column below lg. */}
-          <div className="mbi-shell grid w-full flex-1 grid-cols-1 gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-16 md:py-12">
-            <main className="min-w-0">{children}</main>
-            <aside
-              className="hidden lg:block min-w-0"
-              aria-label="Publicité"
-              style={{ position: 'sticky', top: 'calc(var(--mbi-sticky-offset) + 1.5rem)', alignSelf: 'start' }}
-            >
+          {/* Desktop rail mirrors with the document direction; narrow screens use in-flow ads. */}
+          <div className="mbi-shell cac-content w-full flex-1 py-8 md:py-12">
+            <main id="main-content" tabIndex={-1} className="min-w-0">
+              {children}
+            </main>
+            <aside className="cac-ad-sidebar hidden lg:block min-w-0" aria-label={ui[locale].advertisement}>
               <AdRail locale={locale as Locale} pageContext={adContext} />
             </aside>
           </div>

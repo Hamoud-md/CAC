@@ -32,14 +32,14 @@ export default async function ProjectsPage({ params }: Args) {
               : 'Aucun projet publié pour le moment.'}
         </p>
       ) : (
-        <ul className="mt-8 grid gap-5 sm:grid-cols-2">
+        <ul className="cac-project-grid mt-8">
           {projects.map((p) => {
             const cover = p.coverImage && typeof p.coverImage === 'object' ? p.coverImage : null
             return (
               <li key={p.id}>
                 <Link
                   href={`/${locale}/projets/${p.slug}`}
-                  className="block overflow-hidden rounded-xl border border-[var(--mbi-border)] bg-white"
+                  className="cac-project-card mbi-focus group block overflow-hidden"
                 >
                   {cover && (
                     <div className="aspect-[16/10] overflow-hidden">
@@ -69,4 +69,4 @@ export default async function ProjectsPage({ params }: Args) {
   )
 }
 
-export const metadata: Metadata = { title: 'Projets | MBI' }
+export const metadata: Metadata = { title: 'Projets | CAC' }

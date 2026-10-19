@@ -2,13 +2,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
-import { Menu, X, Phone, Mail, MapPin, ChevronRight, ChevronDown } from 'lucide-react'
-
+import { ChevronDown, Menu, X } from 'lucide-react'
 import type { NavCategory } from '@/lib/data'
 import { localeShort, LOCALES, type Locale } from '@/lib/locales'
 import { LocaleSwitcher } from './LocaleSwitcher'
 import { CategoryNav } from './CategoryNav'
-import { DEFAULT_LOGO_SRC } from '@/components/Logo/Logo'
+import { CAC_LOGO, CAC_NAME, secondaryLabels } from '@/components/site/brand'
 
 type Props = {
   locale: Locale
@@ -19,221 +18,114 @@ type Props = {
   viewAllLabel?: string | null
 }
 
-const localize = (locale: Locale, href: string) =>
-  href.startsWith('/') ? `/${locale}${href}` : href
-
-export const HeaderClient: React.FC<Props> = ({
-  locale,
-  contact,
-  logoUrl,
-  secondaryNav,
-  categories,
-  viewAllLabel,
-}) => {
+export const HeaderClient: React.FC<Props> = ({ locale, secondaryNav, categories, viewAllLabel }) => {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [openCat, setOpenCat] = useState<string | null>(null)
-  // Observe only the *sticky* part (strip + bar + desktop cat-nav) — never the
-  // expandable mobile menu, or opening it feeds its own height back into the
-  // var its max-height depends on (that was the flicker).
+  const [mobileCategory, setMobileCategory] = useState<string | null>(null)
   const stickyRef = useRef<HTMLDivElement>(null)
+  const menuButton = useRef<HTMLButtonElement>(null)
+  const mobileCategoryButtons = useRef(new Map<string, HTMLButtonElement>())
   const pathname = usePathname()
 
   useEffect(() => {
     setMenuOpen(false)
-    setOpenCat(null)
+    setMobileCategory(null)
   }, [pathname])
-
   useEffect(() => {
     const el = stickyRef.current
     if (!el) return
-    const sync = () =>
-      document.documentElement.style.setProperty('--mbi-sticky-offset', `${el.offsetHeight}px`)
+    const sync = () => document.documentElement.style.setProperty('--mbi-sticky-offset', `${el.offsetHeight}px`)
     sync()
-    const ro = new ResizeObserver(sync)
-    ro.observe(el)
-    return () => ro.disconnect()
+    const observer = new ResizeObserver(sync)
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [])
-
-  // Lock background scroll while the mobile menu is open.
   useEffect(() => {
     if (!menuOpen) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = prev
+    const close = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      if (mobileCategory) {
+        mobileCategoryButtons.current.get(mobileCategory)?.focus()
+        setMobileCategory(null)
+      } else {
+        setMenuOpen(false)
+        menuButton.current?.focus()
+      }
     }
-  }, [menuOpen])
+    document.addEventListener('keydown', close)
+    return () => document.removeEventListener('keydown', close)
+  }, [menuOpen, mobileCategory])
 
-  const hasContact = contact.phone || contact.email || contact.address
-  const logo = logoUrl ?? DEFAULT_LOGO_SRC
-
-  const catLink =
-    'mbi-focus flex items-center justify-between rounded-md px-1 py-3 text-[0.95rem] font-medium text-[var(--mbi-text)] border-b border-[var(--mbi-border)] last:border-b-0'
+  const required = ['/projets', '/a-propos', '/contact']
+  const primary = required.map((href, index) => ({
+    href: `/${locale}${href}`,
+    label: secondaryNav.find((item) => item.href === href)?.label || secondaryLabels[locale][index],
+  }))
+  const extras = secondaryNav.filter((item) => !required.includes(item.href))
+  const localize = (href: string) => href.startsWith('/') ? `/${locale}${href}` : href
+  const allItemsLabel = viewAllLabel || (locale === 'ar' ? 'عرض الكل' : locale === 'en' ? 'View all' : 'Tout voir')
+  const categoryPanelId = (category: NavCategory) => `cac-mobile-category-${String(category.id).replace(/[^a-zA-Z0-9_-]/g, '-')}`
+  const closeMobile = () => { setMenuOpen(false); setMobileCategory(null) }
 
   return (
-    <header className="sticky top-0 z-40 bg-white">
-      <div ref={stickyRef} className="border-b border-[var(--mbi-border)] bg-white">
-        {/* Contact strip */}
-        {hasContact && (
-          <div style={{ background: 'var(--mbi-contact-strip)' }} className="text-white">
-            <div className="mbi-shell flex items-center justify-center gap-x-7 gap-y-1 py-2 text-[0.8125rem] max-sm:justify-between max-sm:gap-x-4">
-              {contact.phone && (
-                <a
-                  href={`tel:${contact.phone.replace(/\s/g, '')}`}
-                  className="flex items-center gap-2 text-white/85 transition-colors hover:text-white"
-                >
-                  <Phone size={14} strokeWidth={2} className="shrink-0" aria-hidden />
-                  <span dir="ltr" className="whitespace-nowrap">
-                    {contact.phone}
-                  </span>
-                </a>
-              )}
-              {contact.email && (
-                <a
-                  href={`mailto:${contact.email}`}
-                  className="flex items-center gap-2 text-white/85 transition-colors hover:text-white"
-                >
-                  <Mail size={14} strokeWidth={2} className="shrink-0" aria-hidden />
-                  <span dir="ltr" className="truncate">
-                    {contact.email}
-                  </span>
-                </a>
-              )}
-              {contact.address && (
-                <span className="hidden items-center gap-2 text-white/85 md:flex">
-                  <MapPin size={14} strokeWidth={2} className="shrink-0" aria-hidden />
-                  {contact.address}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Main bar */}
-        <div className="mbi-shell flex h-[var(--mbi-header-h)] items-center justify-between gap-6">
-          <Link
-            href={`/${locale}`}
-            aria-label="CAC — Contemporary Artistic Construction"
-            className="flex shrink-0 items-center"
-          >
+    <header className="cac-header">
+      <div ref={stickyRef}>
+        <div className="mbi-shell cac-header-top">
+          <Link href={`/${locale}`} aria-label={CAC_NAME} className="mbi-focus cac-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={logo}
-              alt="CAC — Contemporary Artistic Construction"
-              width={592}
-              height={771}
-              className="h-12 w-auto md:h-16"
-            />
+            <img src={CAC_LOGO} alt={CAC_NAME} width={253} height={127} className="cac-logo" />
           </Link>
-
-          <nav className="hidden items-center gap-8 md:flex">
-            {secondaryNav.map((item) => {
-              const href = localize(locale, item.href)
-              const active = pathname === href
-              return (
-                <Link
-                  key={item.href}
-                  href={href}
-                  aria-current={active ? 'page' : undefined}
-                  className={
-                    'mbi-focus rounded text-[0.9375rem] font-medium transition-colors ' +
-                    (active
-                      ? 'text-[var(--mbi-purple)]'
-                      : 'text-[var(--mbi-text)] hover:text-[var(--mbi-purple)]')
-                  }
-                >
-                  {item.label}
-                </Link>
-              )
-            })}
-          </nav>
-
-          <div className="flex shrink-0 items-center gap-2">
+          <span className="cac-wordmark" aria-hidden="true">CONTEMPORARY<br />ARTISTIC CONSTRUCTION</span>
+          <div className="cac-header-actions">
             <LocaleSwitcher current={locale} locales={LOCALES} labels={localeShort} />
-            <button
-              type="button"
-              onClick={() => setMenuOpen((o) => !o)}
-              aria-label="Menu"
-              aria-expanded={menuOpen}
-              className="mbi-focus grid h-9 w-9 place-items-center rounded-md border border-[var(--mbi-border)] text-[var(--mbi-text)] md:hidden"
-            >
-              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+            <button ref={menuButton} type="button" onClick={() => {
+              if (menuOpen) closeMobile()
+              else setMenuOpen(true)
+            }} aria-label={locale === 'ar' ? 'القائمة' : locale === 'en' ? 'Menu' : 'Menu'} aria-controls="cac-mobile-nav" aria-expanded={menuOpen} className="cac-menu-button mbi-focus">
+              {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
-
-        {/* Desktop category bar with dropdowns */}
-        <div className="hidden md:block">
+        <div className="cac-desktop-nav">
           <CategoryNav categories={categories} locale={locale} viewAllLabel={viewAllLabel} />
-        </div>
-      </div>
-
-      {/* Mobile slide-down menu — outside the observed sticky wrapper */}
-      {menuOpen && (
-        <div className="absolute inset-x-0 top-full max-h-[calc(100dvh-var(--mbi-sticky-offset))] overflow-y-auto overscroll-contain border-b border-[var(--mbi-border)] bg-white shadow-lg md:hidden">
-          <nav className="mbi-shell flex flex-col py-2">
-            {secondaryNav.map((item) => (
-              <Link key={item.href} href={localize(locale, item.href)} className={catLink}>
-                {item.label}
-                <ChevronRight size={16} className="text-[var(--mbi-text-muted)] rtl:rotate-180" />
-              </Link>
+          <nav className="cac-main-nav mbi-shell" aria-label={locale === 'ar' ? 'صفحات الموقع' : locale === 'en' ? 'Main pages' : 'Pages principales'}>
+            {primary.map((item) => (
+              <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className="cac-nav-link mbi-focus">{item.label}</Link>
             ))}
-
-            {categories.map((cat) => {
-              const base = `/${locale}/services/${cat.slug}`
-              if (cat.hasPage) {
-                return (
-                  <Link key={cat.id} href={base} className={catLink}>
-                    {cat.title}
-                    <ChevronRight size={16} className="text-[var(--mbi-text-muted)] rtl:rotate-180" />
-                  </Link>
-                )
-              }
-              const isOpen = openCat === cat.slug
-              return (
-                <div key={cat.id} className="border-b border-[var(--mbi-border)] last:border-b-0">
-                  <button
-                    type="button"
-                    onClick={() => setOpenCat(isOpen ? null : cat.slug)}
-                    aria-expanded={isOpen}
-                    className="mbi-focus flex w-full items-center justify-between rounded-md px-1 py-3 text-[0.95rem] font-medium text-[var(--mbi-text)]"
-                  >
-                    {cat.title}
-                    <ChevronDown
-                      size={16}
-                      className={
-                        'text-[var(--mbi-text-muted)] transition-transform ' +
-                        (isOpen ? 'rotate-180' : '')
-                      }
-                    />
-                  </button>
-                  {isOpen && (
-                    <ul className="pb-2">
-                      {cat.services.map((s) => (
-                        <li key={s.id}>
-                          <Link
-                            href={`/${locale}/services/${cat.slug}/${s.slug}`}
-                            className="mbi-focus block rounded-md px-3 py-2.5 text-[0.9rem] text-[var(--mbi-text-soft)]"
-                          >
-                            {s.title}
-                          </Link>
-                        </li>
-                      ))}
-                      <li>
-                        <Link
-                          href={base}
-                          className="mbi-focus block rounded-md px-3 py-2.5 text-[0.85rem] font-semibold text-[var(--mbi-purple)]"
-                        >
-                          {viewAllLabel || (locale === 'ar' ? 'عرض الكل' : locale === 'en' ? 'View all' : 'Tout voir')} →
-                        </Link>
-                      </li>
-                    </ul>
-                  )}
-                </div>
-              )
+            {extras.map((item) => {
+              const href = localize(item.href)
+              return <Link key={item.href} href={href} aria-current={pathname === href ? 'page' : undefined} className="cac-nav-link mbi-focus">{item.label}</Link>
             })}
           </nav>
         </div>
+      </div>
+      {menuOpen && (
+        <nav id="cac-mobile-nav" className="cac-mobile-nav" aria-label={locale === 'ar' ? 'القائمة الرئيسية' : locale === 'en' ? 'Main navigation' : 'Navigation principale'}>
+          <ul className="cac-mobile-list">
+            {categories.map((category) => {
+              const base = `/${locale}/services/${category.slug}`
+              const expanded = mobileCategory === category.slug
+              if (category.hasPage) return <li key={category.id}><Link href={base} className="cac-mobile-link mbi-focus" onClick={closeMobile}>{category.title}</Link></li>
+              const panelId = categoryPanelId(category)
+              return (
+                <li key={category.id} className="cac-mobile-group">
+                  <button ref={(node) => { if (node) mobileCategoryButtons.current.set(category.slug, node); else mobileCategoryButtons.current.delete(category.slug) }} type="button" className="cac-mobile-link cac-mobile-toggle mbi-focus" aria-expanded={expanded} aria-controls={panelId} onClick={() => setMobileCategory(expanded ? null : category.slug)}>
+                    <span>{category.title}</span><ChevronDown size={16} aria-hidden className={expanded ? 'is-rotated' : ''} />
+                  </button>
+                  {expanded && <ul id={panelId} className="cac-mobile-subservices">
+                    {category.services.map((service) => <li key={service.id}><Link href={`${base}/${service.slug}`} className="cac-mobile-link mbi-focus" onClick={closeMobile}>{service.title}</Link></li>)}
+                    <li><Link href={base} className="cac-mobile-link cac-view-all mbi-focus" onClick={closeMobile}>{allItemsLabel}</Link></li>
+                  </ul>}
+                </li>
+              )
+            })}
+            {primary.map((item) => <li key={item.href}><Link href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className="cac-mobile-link mbi-focus" onClick={closeMobile}>{item.label}</Link></li>)}
+            {extras.map((item) => {
+              const href = localize(item.href)
+              return <li key={item.href}><Link href={href} aria-current={pathname === href ? 'page' : undefined} className="cac-mobile-link mbi-focus" onClick={closeMobile}>{item.label}</Link></li>
+            })}
+          </ul>
+        </nav>
       )}
     </header>
   )

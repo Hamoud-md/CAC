@@ -1,0 +1,12 @@
+{
+  "repository": "Hamoud-md/CAC",
+  "path": "/home/bouye/apps/cac-main",
+  "backup_project": "cac-main",
+  "checks": [["python3", "/usr/local/lib/bessma-deploy/cac-main-app.py", "preflight"]],
+  "deploy": [["python3", "/usr/local/lib/bessma-deploy/cac-main-app.py", "deploy"]],
+  "rollback": [["python3", "/usr/local/lib/bessma-deploy/cac-main-app.py", "rollback"]],
+  "health_urls": ["https://cac.yasserai.net/en", "https://cac.yasserai.net/fr", "https://cac.yasserai.net/ar"],
+  "protected": [".env", ".env.production", "docker-compose.live.yml", "CAC-app/public/media", "instance-backups", "backups", "DEPLOYED-RELEASE.json"],
+  "rollback_excludes": ["node_modules", ".git", ".next", "CAC-app/node_modules", "CAC-app/.next", "CAC-app/public/media", "instance-backups", "backups"],
+  "deploy_timeout": 3600
+}

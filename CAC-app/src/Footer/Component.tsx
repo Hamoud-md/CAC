@@ -4,32 +4,38 @@ import { Phone, Mail, MapPin } from 'lucide-react'
 
 import { getNav, getSiteSettings } from '@/lib/data'
 import { ui, type Locale } from '@/lib/locales'
-import { DEFAULT_LOGO_SRC } from '@/components/Logo/Logo'
+import { CAC_LOGO, CAC_NAME, secondaryLabels } from '@/components/site/brand'
 
 export async function SiteFooter({ locale }: { locale: Locale }) {
   const [settings, nav] = await Promise.all([getSiteSettings(locale), getNav(locale)])
-  const items = (settings?.secondaryNav ?? []).map((n) => ({ label: n.label ?? '', href: n.href ?? '#' }))
-  const logoUrl =
-    settings?.logo && typeof settings.logo === 'object' ? (settings.logo.url ?? null) : null
-  const logo = logoUrl ?? DEFAULT_LOGO_SRC
+  const required = ['/projets', '/a-propos', '/contact']
+  const items = [
+    ...required.map((href, index) => ({ href, label: secondaryLabels[locale][index] })),
+    ...(settings?.secondaryNav ?? [])
+      .filter((n) => !required.includes(n.href ?? ''))
+      .map((n) => ({ label: n.label ?? '', href: n.href ?? '#' })),
+  ]
+  const logo = CAC_LOGO
   const t = ui[locale]
 
   return (
     <footer className="mt-auto text-white/75" style={{ background: 'var(--mbi-purple-deep)' }}>
       <div className="mbi-shell grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1.1fr] md:gap-12">
         <div>
-          <span className="inline-flex rounded-md bg-white p-2">
+          <span className="inline-flex">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logo}
               alt="CAC — Contemporary Artistic Construction"
-              width={592}
-              height={771}
-              className="h-16 w-auto"
+              width={253}
+              height={127}
+              className="h-auto w-44"
             />
           </span>
           {settings?.tagline && (
-            <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/60">{settings.tagline}</p>
+            <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/60">
+              {settings.tagline}
+            </p>
           )}
         </div>
 
@@ -38,7 +44,11 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
             {t.menu}
           </p>
           {items.map((i) => (
-            <Link key={i.href} href={`/${locale}${i.href}`} className="w-fit hover:text-white">
+            <Link
+              key={i.href}
+              href={i.href.startsWith('/') ? `/${locale}${i.href}` : i.href}
+              className="w-fit hover:text-white"
+            >
               {i.label}
             </Link>
           ))}
@@ -95,7 +105,7 @@ export async function SiteFooter({ locale }: { locale: Locale }) {
 
       <div className="border-t border-white/10">
         <div className="mbi-shell py-4 text-xs text-white/40">
-          © {new Date().getFullYear()} MBI — Modern Building Industry
+          © {new Date().getFullYear()} {CAC_NAME}
         </div>
       </div>
     </footer>
