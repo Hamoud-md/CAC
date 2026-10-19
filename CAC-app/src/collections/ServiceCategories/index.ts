@@ -1,3 +1,4 @@
+import { protectReferencedContent } from '../../hooks/protectReferencedContent'
 import type { CollectionConfig } from 'payload'
 
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
@@ -42,6 +43,7 @@ export const ServiceCategories: CollectionConfig<'service-categories'> = {
     localizedSlug('title'),
   ],
   hooks: {
+    beforeDelete: [protectReferencedContent],
     afterChange: [revalidateCategory, createSlugRedirect('services')],
     afterDelete: [revalidateCategoryDelete],
   },

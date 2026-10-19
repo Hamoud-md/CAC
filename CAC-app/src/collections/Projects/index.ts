@@ -1,3 +1,4 @@
+import { protectReferencedContent } from '../../hooks/protectReferencedContent'
 import type { CollectionConfig } from 'payload'
 import { createSlugRedirect } from '../../hooks/createSlugRedirect'
 
@@ -117,6 +118,7 @@ export const Projects: CollectionConfig<'projects'> = {
     localizedSlug('title'),
   ],
   hooks: {
+    beforeDelete: [protectReferencedContent],
     afterChange: [revalidateProject, createSlugRedirect('projets')],
     afterDelete: [revalidateProjectDelete],
   },

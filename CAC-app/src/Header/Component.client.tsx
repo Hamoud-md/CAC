@@ -18,7 +18,7 @@ type Props = {
   viewAllLabel?: string | null
 }
 
-export const HeaderClient: React.FC<Props> = ({ locale, secondaryNav, categories, viewAllLabel }) => {
+export const HeaderClient: React.FC<Props> = ({ locale, logoUrl, secondaryNav, categories, viewAllLabel }) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileCategory, setMobileCategory] = useState<string | null>(null)
   const stickyRef = useRef<HTMLDivElement>(null)
@@ -73,7 +73,7 @@ export const HeaderClient: React.FC<Props> = ({ locale, secondaryNav, categories
         <div className="mbi-shell cac-header-top">
           <Link href={`/${locale}`} aria-label={CAC_NAME} className="mbi-focus cac-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={CAC_LOGO} alt={CAC_NAME} width={253} height={127} className="cac-logo" />
+            <img src={logoUrl || CAC_LOGO} alt={CAC_NAME} width={253} height={127} className="cac-logo" />
           </Link>
           <span className="cac-wordmark" aria-hidden="true">CONTEMPORARY<br />ARTISTIC CONSTRUCTION</span>
           <div className="cac-header-actions">

@@ -1,3 +1,4 @@
+import { protectReferencedContent } from '../hooks/protectReferencedContent'
 import type { CollectionConfig } from 'payload'
 
 import {
@@ -79,6 +80,7 @@ export const Media: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeDelete: [protectReferencedContent],
     afterChange: [revalidateMedia],
     afterDelete: [revalidateMediaDelete],
     beforeValidate: [
